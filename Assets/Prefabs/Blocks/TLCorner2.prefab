@@ -203,9 +203,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5993773130528268014}
+  - component: {fileID: -7174866700201430217}
   m_Layer: 0
   m_Name: TLCorner2
-  m_TagString: Untagged
+  m_TagString: Block
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -230,6 +231,26 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-7174866700201430217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3323228357282199748}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 360e950ad5f2ad04eb91ab43788f7afa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  children: []
+  materials:
+  - {fileID: 2100000, guid: 76a122216932550439182a39884bbbc4, type: 2}
+  - {fileID: 2100000, guid: 9998024f706183e42abb4a372f4a0f44, type: 2}
+  - {fileID: 2100000, guid: 8a715b7d406722a4185857c9601752e2, type: 2}
+  - {fileID: 2100000, guid: 011deb938062ced428a892b82fd6b8a4, type: 2}
+  - {fileID: 2100000, guid: 4b5546f9ed1290b458ca7e6eb5504a2d, type: 2}
+  - {fileID: 2100000, guid: 25dc36e54c5af1b47b5cd5e8b4e5a3ea, type: 2}
 --- !u!1 &5691133892435100159
 GameObject:
   m_ObjectHideFlags: 0

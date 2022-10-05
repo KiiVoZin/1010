@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class ObjectScript : MonoBehaviour
 {
-    public List<GameObject> children = new List<GameObject>();
+    public List<GameObject> children;
+    [SerializeField] public List<Material> materials;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         for (int i = 0; i < transform.childCount; i++)
         {
@@ -14,11 +15,12 @@ public class ObjectScript : MonoBehaviour
         }
     }
 
-    public void Paint(Material material)
+    public void Paint()
     {
-        foreach(GameObject child in children)
+        Material mat = materials[Random.Range(0, materials.Count-1)];
+        foreach (GameObject child in children)
         {
-            child.GetComponent<MeshRenderer>().material = material;
+            child.GetComponent<MeshRenderer>().material = mat;
         }
     }
 }
