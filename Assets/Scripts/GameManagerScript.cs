@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Playables;
 
 public class GameManagerScript : MonoBehaviour
 {
@@ -46,6 +47,41 @@ public class GameManagerScript : MonoBehaviour
     void Update()
     {
         Controller();
+    }
+    public void Place(GameObject gameObject, float x, float y)
+    {
+        foreach(GameObject child in gameObject.GetComponent<ObjectScript>().children)
+        {
+            Vector3 floatPosition = child.transform.position;
+            if (floatPosition.x % 1 == 0) floatPosition.x += 0.1f;
+            if (floatPosition.y % 1 == 0) floatPosition.y += 0.1f;
+            //Vector3 intPosition = new Vector3(MathF.Round(floatPosition.x), MathF.Round(floatPosition.y), 0);
+            Vector3 intPosition = new Vector3(Mathf.Floor(floatPosition.x), Mathf.Floor(floatPosition.y), 0);
+            gridObjects[(int)intPosition.x, (int)intPosition.y] = child;
+            child.transform.position = intPosition;
+            child.transform.SetParent(null);
+        }
+    }
+    public bool IsPlacable(GameObject gameObject, float x, float y)
+    {
+        List<GameObject> children = toDrag.GetComponent<ObjectScript>().children;
+
+        foreach (GameObject child in children)
+        {
+            Vector3 floatPosition = child.transform.position;
+            Debug.Log("CHILD: " + child.name + " " + floatPosition);
+            //if (floatPosition.x % 1 == 0) floatPosition.x += 0.1f;
+            //if (floatPosition.y % 1 == 0) floatPosition.y += 0.1f;
+            //Vector3 intPosition = new Vector3(MathF.Round(floatPosition.x), MathF.Round(floatPosition.y), 0);
+            Vector3 intPosition = new Vector3(MathF.Floor(floatPosition.x), MathF.Floor(floatPosition.y), 0);
+            Debug.Log("CHILD2: " + child.name + " " + intPosition);
+            if (intPosition.x < 0 || intPosition.x > GridWidth - 1 || intPosition.y < 0 || intPosition.y > GridHeight - 1 || gridObjects[(int)intPosition.x, (int)intPosition.y] != null)
+            {
+                Debug.Log("FALSE");
+                return false;
+            }
+        }
+        return true;
     }
 
     public void DestroyLine()
@@ -137,32 +173,16 @@ public class GameManagerScript : MonoBehaviour
             if (toDrag == null) return;
             toDrag.transform.position = mousePos;
         }
-        else if (Input.GetMouseButtonUp(0))
+        else if (Input.GetMouseButtonUp(0) && toDrag != null)
         {
-            if (toDrag == null) return;
-            List<GameObject> children = toDrag.GetComponent<ObjectScript>().children;
-            List<Vector2> positions = new List<Vector2>();
-            Material mat = children[0].GetComponent<MeshRenderer>().material;
-            Vector3 newPos = Vector3.zero;
-            foreach (GameObject child in children)
+            //toDrag.transform.position = new Vector3(5f, 5f, 0);
+            Vector3 position = toDrag.transform.position;
+            if (!IsPlacable(toDrag, position.x, position.y))
             {
-                newPos = child.transform.position;
-                newPos = new Vector3(Mathf.Round(newPos.x), Mathf.Round(newPos.y), 0);
-                if (newPos.x < 0 || newPos.x > GridWidth - 1 || newPos.y < 0 || newPos.y > GridHeight - 1 || gridObjects[(int)newPos.x, (int)newPos.y] == true)
-                {
-                    toDrag.transform.position = originalPos;
-                    toDrag = null;
-                    return;
-                }
-                positions.Add(newPos);
-            }
-            for (int i = 0; i < positions.Count; i++)
-            {
-                GameObject block = Instantiate(BlockPrefab);
-                block.transform.position = positions[i];
-                block.GetComponent<MeshRenderer>().material = mat;
-                gridObjects[(int)positions[i].x, (int)positions[i].y] = block;
-            }
+                toDrag.transform.position = originalPos;
+                return;
+            } ;
+            Place(toDrag, position.x, position.y);
             Destroy(toDrag);
             DestroyLine();
 
