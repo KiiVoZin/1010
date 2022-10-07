@@ -44,9 +44,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be54ceb2ce5461b4397d8ebb940e6c9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GridHeight: 10
-  GridWidth: 10
-  GridPrefab: {fileID: 6908504796218377770, guid: 9d7bf687b1a908140811457cbac983b5, type: 3}
+  GridCenter: {x: 0, y: 0}
+  GridHeight: 0
+  GridWidth: 0
+  GridCellSize: 1
+  GridOffset: 0
+  BasePrefab: {fileID: 6908504796218377770, guid: 9d7bf687b1a908140811457cbac983b5, type: 3}
   BorderPrefab: {fileID: 1826650107229382344, guid: 2505ac1f952503248ad93b6eddbf1387, type: 3}
   SpawnerPrefab: {fileID: 7917504377145356092, guid: 40eaa901768afa840b527e7c81f8e018, type: 3}
   BlockPrefab: {fileID: 4994250357333257997, guid: 50461ae5318925243b50a8b0abce3bfc, type: 3}

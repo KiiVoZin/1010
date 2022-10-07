@@ -352,6 +352,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3580201745267827525, guid: fa93fc66cafb0024285f4b0dc61e697d, type: 3}
+      propertyPath: GridWidth
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3580201745267827525, guid: fa93fc66cafb0024285f4b0dc61e697d, type: 3}
+      propertyPath: GridHeight
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 3580201745267827527, guid: fa93fc66cafb0024285f4b0dc61e697d, type: 3}
       propertyPath: m_Name
       value: GameManager

@@ -6,29 +6,31 @@ using UnityEngine.Playables;
 
 public class GameManagerScript : MonoBehaviour
 {
+    [SerializeField] public Vector2 GridCenter;
     [SerializeField] public int GridHeight, GridWidth;
-    [SerializeField] public GameObject GridPrefab, BorderPrefab, SpawnerPrefab, BlockPrefab;
+    [SerializeField] public float GridCellSize, GridOffSet;
+    [SerializeField] public GameObject BasePrefab, BorderPrefab, SpawnerPrefab, BlockPrefab;
     [SerializeField] List<Material> Materials;
     SpawnerScript SpawnerScript;
     float dist;
     Vector3 originalPos;
     Vector3 offSet;
     GameObject toDrag;
-
-    GameObject Grid;
     GameObject Spawner;
     GameObject[,] gridObjects;
-
+    GridScript Grid;
     int counter;
     // Start is called before the first frame update
     void Awake()
     {
+        Grid = new GridScript(GridCenter, GridWidth, GridHeight, GridCellSize, GridOffSet);
+        DrawGrid();
         counter = 0;
-        Grid = Instantiate(GridPrefab);
+        //Grid = Instantiate(GridPrefab);
         Spawner = Instantiate(SpawnerPrefab);
         originalPos = Vector3.zero;
 
-        Grid.GetComponent<GridScript>().Set(GridHeight, GridWidth);
+        //Grid.GetComponent<GridScript>().Set(GridHeight, GridWidth);
         SpawnerScript = Spawner.GetComponent<SpawnerScript>();
         SpawnerScript.Set();
         SpawnerScript.Spawn();
@@ -196,6 +198,44 @@ public class GameManagerScript : MonoBehaviour
         else
         {
             toDrag = null;
+        }
+    }
+    public void DrawGrid()
+    {
+        GameObject grid = new GameObject();
+        grid.name = "Grid";
+        for (int i = 0; i < GridWidth; i++)
+        {
+            for (int j = 0; j < GridHeight; j++)
+            {
+                Vector3 worldPosition = Grid.GetWorldPosition(i, j);
+                GameObject back = GameObject.Instantiate(BasePrefab);
+                back.transform.localScale = new Vector3(0.1f, 1, 0.1f);
+                back.transform.eulerAngles = new Vector3(-90, 0, 0);
+                back.transform.position = worldPosition;
+                GameObject borderRight = GameObject.Instantiate(BorderPrefab);
+                borderRight.transform.localScale = new Vector3(0.1f, Grid.CellSize, 0.1f);
+                borderRight.transform.position = back.transform.position + new Vector3(Grid.CellSize / 2, 0, 0);
+                
+                GameObject borderLeft = GameObject.Instantiate(BorderPrefab);
+                borderLeft.transform.localScale = new Vector3(0.1f, Grid.CellSize, 0.1f);
+                borderLeft.transform.position = worldPosition - new Vector3(Grid.CellSize / 2, 0, 0);
+                
+                GameObject borderTop = GameObject.Instantiate(BorderPrefab);
+                borderTop.transform.localScale = new Vector3(Grid.CellSize, 0.1f, 0.1f);
+                borderTop.transform.position = worldPosition + new Vector3(0, Grid.CellSize / 2, 0);
+                
+                GameObject borderBottom = GameObject.Instantiate(BorderPrefab);
+                borderBottom.transform.localScale = new Vector3(Grid.CellSize, 0.1f, 0.1f);
+                borderBottom.transform.position = worldPosition - new Vector3(0, Grid.CellSize / 2, 0);
+                
+                back.transform.SetParent(grid.transform);
+                borderTop.transform.SetParent(grid.transform);
+                borderBottom.transform.SetParent(grid.transform);
+                borderLeft.transform.SetParent(grid.transform);
+                borderRight.transform.SetParent(grid.transform);
+
+            }            
         }
     }
 }
