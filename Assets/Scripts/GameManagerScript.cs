@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Playables;
+using UnityEngine.SceneManagement;
 
 public class GameManagerScript : MonoBehaviour
 {
@@ -17,7 +18,6 @@ public class GameManagerScript : MonoBehaviour
     Vector3 offSet;
     GameObject toDrag;
     GameObject Spawner;
-    GameObject[,] gridObjects;
     GridScript Grid;
     int counter;
     // Start is called before the first frame update
@@ -32,17 +32,8 @@ public class GameManagerScript : MonoBehaviour
 
         //Grid.GetComponent<GridScript>().Set(GridHeight, GridWidth);
         SpawnerScript = Spawner.GetComponent<SpawnerScript>();
-        SpawnerScript.Set();
+        SpawnerScript.Set(Grid);
         SpawnerScript.Spawn();
-
-        gridObjects = new GameObject[GridWidth, GridHeight];
-        for (int i = 0; i < GridWidth; i++)
-        {
-            for (int j = 0; j < GridHeight; j++)
-            {
-                gridObjects[i, j] = null;
-            }
-        }
     }
 
     // Update is called once per frame
@@ -52,57 +43,79 @@ public class GameManagerScript : MonoBehaviour
     }
     public void Place(GameObject gameObject, float x, float y)
     {
-        foreach(GameObject child in gameObject.GetComponent<ObjectScript>().children)
+        bool isValid;
+        List<GameObject> children = gameObject.GetComponent<ObjectScript>().children;
+        foreach(GameObject child in children)
         {
             Vector3 floatPosition = child.transform.position;
-            if (floatPosition.x % 1 == 0) floatPosition.x += 0.1f;
-            if (floatPosition.y % 1 == 0) floatPosition.y += 0.1f;
-            //Vector3 intPosition = new Vector3(MathF.Round(floatPosition.x), MathF.Round(floatPosition.y), 0);
-            Vector3 intPosition = new Vector3(Mathf.Floor(floatPosition.x), Mathf.Floor(floatPosition.y), 0);
-            gridObjects[(int)intPosition.x, (int)intPosition.y] = child;
-            child.transform.position = intPosition;
+            Vector3 gridPosition = Grid.GetNearestGridPosition(floatPosition, out isValid);
+            if (!isValid) return;
+            Grid.Grid[(int)gridPosition.x, (int)gridPosition.y] = child;
+            child.transform.position = Grid.GetWorldPosition(gridPosition);
             child.transform.SetParent(null);
         }
     }
-    public bool IsPlacable(GameObject gameObject, float x, float y)
+    public bool IsPlacable(GameObject gameObject)
     {
-        List<GameObject> children = toDrag.GetComponent<ObjectScript>().children;
+        bool isValid;
+        List<GameObject> children = gameObject.GetComponent<ObjectScript>().children;
+        List<Vector3> savedPositions = new List<Vector3>();
 
         foreach (GameObject child in children)
         {
             Vector3 floatPosition = child.transform.position;
-            Debug.Log("CHILD: " + child.name + " " + floatPosition);
-            //if (floatPosition.x % 1 == 0) floatPosition.x += 0.1f;
-            //if (floatPosition.y % 1 == 0) floatPosition.y += 0.1f;
-            //Vector3 intPosition = new Vector3(MathF.Round(floatPosition.x), MathF.Round(floatPosition.y), 0);
-            Vector3 intPosition = new Vector3(MathF.Floor(floatPosition.x), MathF.Floor(floatPosition.y), 0);
-            Debug.Log("CHILD2: " + child.name + " " + intPosition);
-            if (intPosition.x < 0 || intPosition.x > GridWidth - 1 || intPosition.y < 0 || intPosition.y > GridHeight - 1 || gridObjects[(int)intPosition.x, (int)intPosition.y] != null)
+            Vector3 gridPosition = Grid.GetNearestGridPosition(floatPosition, out isValid);
+            if (Grid.Grid[(int)gridPosition.x, (int)gridPosition.y] != null || !isValid || savedPositions.Contains(gridPosition))
             {
-                Debug.Log("FALSE");
                 return false;
             }
+            savedPositions.Add(gridPosition);
         }
         return true;
     }
 
+    public bool CheckFinished()
+    {
+        foreach (var block in SpawnerScript.CurrentBlocks)
+        {
+            if(block == null) continue;
+            Vector3 oldPos = block.transform.position;
+            for (int i = 0; i < GridWidth; i++)
+            {
+                for (int j = 0; j < GridHeight; j++)
+                {
+                    block.transform.position = Grid.GetWorldPosition(new Vector2(i, j));
+                    if (IsPlacable(block))
+                    {
+                        Debug.Log(block.name);
+                        Debug.Log(block.transform.position);
+                        block.transform.position = oldPos;
+                        return true;
+                    }
+                }
+            }
+            block.transform.position = oldPos;
+        }
+
+        return false;
+    }
     public void DestroyLine()
     {
         List<int> fullRows = new List<int>();
         List<int> fullColumns = new List<int>();
-        for (int i = 0; i < GridHeight; i++)
+        for (int j = 0; j < GridHeight; j++)
         {
-            for (int j = 0; j < GridWidth; j++)
+            for (int i = 0; i < GridWidth; i++)
             {
-                if (gridObjects[i, j] == null) break;
-                else if (j == GridWidth - 1) fullRows.Add(i);
+                if (Grid.Grid[i, j] == null) break;
+                else if (i == GridWidth - 1) fullRows.Add(j);
             }
         }
         for (int i = 0; i < GridWidth; i++)
         {
             for (int j = 0; j < GridHeight; j++)
             {
-                if (gridObjects[j, i] == null) break;
+                if (Grid.Grid[i, j] == null) break;
                 else if (j == GridHeight - 1) fullColumns.Add(i);
             }
         }
@@ -110,10 +123,10 @@ public class GameManagerScript : MonoBehaviour
         {
             for (int i = 0; i < GridWidth; i++)
             {
-                if (gridObjects[row, i] != null)
+                if (Grid.Grid[i, row] != null)
                 {
-                    Destroy(gridObjects[row, i]);
-                    gridObjects[row, i] = null;
+                    Destroy(Grid.Grid[i, row]);
+                    Grid.Grid[i, row] = null;
                 }
             }
         }
@@ -121,10 +134,10 @@ public class GameManagerScript : MonoBehaviour
         {
             for (int i = 0; i < GridHeight; i++)
             {
-                if (gridObjects[i, column] != null)
+                if (Grid.Grid[column, i] != null)
                 {
-                    Destroy(gridObjects[i, column]);
-                    gridObjects[i, column] = null;
+                    Destroy(Grid.Grid[column, i]);
+                    Grid.Grid[column, i] = null;
                 }
             }
         }
@@ -177,9 +190,8 @@ public class GameManagerScript : MonoBehaviour
         }
         else if (Input.GetMouseButtonUp(0) && toDrag != null)
         {
-            //toDrag.transform.position = new Vector3(5f, 5f, 0);
             Vector3 position = toDrag.transform.position;
-            if (!IsPlacable(toDrag, position.x, position.y))
+            if (!IsPlacable(toDrag))
             {
                 toDrag.transform.position = originalPos;
                 return;
@@ -187,13 +199,14 @@ public class GameManagerScript : MonoBehaviour
             Place(toDrag, position.x, position.y);
             Destroy(toDrag);
             DestroyLine();
-
             counter++;
             if (counter > 2)
             {
                 SpawnerScript.Spawn();
                 counter = 0;
             }
+
+            if (!CheckFinished()) SceneManager.LoadScene(0);
         }
         else
         {
@@ -208,7 +221,7 @@ public class GameManagerScript : MonoBehaviour
         {
             for (int j = 0; j < GridHeight; j++)
             {
-                Vector3 worldPosition = Grid.GetWorldPosition(i, j);
+                Vector3 worldPosition = Grid.GetWorldPosition(new Vector2(i, j));
                 GameObject back = GameObject.Instantiate(BasePrefab);
                 back.transform.localScale = new Vector3(0.1f, 1, 0.1f);
                 back.transform.eulerAngles = new Vector3(-90, 0, 0);

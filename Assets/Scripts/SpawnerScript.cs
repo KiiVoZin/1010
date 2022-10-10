@@ -40,14 +40,16 @@ public class SpawnerScript : MonoBehaviour
         CurrentBlocks.Add(object2);
     }
 
-    public void Set()
+    public void Set(GridScript grid)
     {
-        GameObject grid = GameObject.FindGameObjectWithTag("Grid");
+        Vector2 upRightGridPos = new Vector2(grid.GetWorldPosition(new Vector2(grid.GridWidth-1, 0)).x + grid.CellSize/2, 
+            grid.GetWorldPosition(new Vector2(0, grid.GridHeight-1)).y + grid.CellSize/2);
+        Vector2 bottomRightGridPos = new Vector2(grid.GetWorldPosition(new Vector2(grid.GridWidth-1, 0)).x + grid.CellSize/2,
+            grid.GetWorldPosition(new Vector2(0, 0)).y - grid.CellSize/2);
 
-        Vector3 gridScale = grid.transform.localScale;
-        Vector3 gridPos = grid.transform.position;
+        Vector2 spawnPosition = (upRightGridPos + bottomRightGridPos)/2;
 
-        transform.position = new Vector3(gridPos.x + (gridScale.x / 2 * planeToBox) + (0.5f / 2 * planeToBox) + distanceGridSpawn, gridPos.y, 0);
+        transform.position = new Vector3(spawnPosition.x + distanceGridSpawn + 3, spawnPosition.y, 0);
 
         Vector2 position = transform.position;
         Area0 = Tuple.Create(position + new Vector2(-2, 2), position + new Vector2(2, 6));

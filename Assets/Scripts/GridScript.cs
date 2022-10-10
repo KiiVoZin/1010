@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditorInternal;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class GridScript
 {
@@ -15,40 +16,16 @@ public class GridScript
     public int GridHeight;
     public float CellSize;
     public float OffSet;
-    // Start is called before the first frame update
-
-    public void Set(int gridHeight, int gridWidth)
-    {
-        //const float planeToBox = 10;
-        //const float offSet = 0.5f;
-        //const float borderWidth = 0.1f;
-
-        //Vector3 gridScale = new Vector3(((float)GridWidth + 1) / planeToBox, 1, ((float)GridHeight + 1) / planeToBox);
-        //Vector3 gridPos = new Vector3(((float)GridWidth - 1) / 2, ((float)GridHeight - 1) / 2, 0);
-
-        //transform.position = gridPos;
-        //transform.localScale = gridScale;
-
-
-        //Camera.main.transform.position = new Vector3(gridPos.x, gridPos.y, -(Mathf.Max(Mathf.Max(gridScale.x, gridScale.z) * 5 + 5, 12)));
-
-        //for (int i = 0; i <= GridWidth; i++)
-        //{
-        //    GameObject border = Instantiate(Border);
-        //    border.transform.position = new Vector3(i - offSet, gridPos.y, 0);
-        //    border.transform.localScale = new Vector3(borderWidth, gridScale.z * planeToBox - 2 * offSet, borderWidth);
-        //}
-        //for (int i = 0; i <= GridHeight; i++)
-        //{
-        //    GameObject border = Instantiate(Border);
-        //    border.transform.position = new Vector3(gridPos.x, i - offSet, 0);
-        //    border.transform.localScale = new Vector3(gridScale.x * planeToBox - 2 * offSet, borderWidth, borderWidth);
-        //}
-    }
-
     public GridScript(Vector2 gridCenter, int gridWidth, int gridHeight, float cellSize, float offSet)
     {
         Grid = new GameObject[gridWidth, gridHeight];
+        for (int i = 0; i < gridWidth; i++)
+        {
+            for (int j = 0; j < gridHeight; j++)
+            {
+                Grid[i, j] = null;
+            }
+        }
         this.GridCenter = gridCenter;
         this.GridWidth = gridWidth;
         this.GridHeight = gridHeight;
@@ -57,8 +34,45 @@ public class GridScript
         GridOrigin = CalculateOrigin();
     }
 
-    public Vector2 GetWorldPosition(int xPos, int yPos)
+    public Vector2 GetNearestGridPosition(Vector2 position, out bool isValid)
     {
+        //Borders
+        Vector2 bottomLeft = GetWorldPosition(new Vector2(0, 0));
+        Vector2 topRight = GetWorldPosition(new Vector2(GridWidth-1, GridHeight-1));
+        //If point is not on the grid, return null
+        if (position.x < bottomLeft.x - CellSize/2 || position.x > topRight.x + CellSize/2 ||
+            position.y < bottomLeft.y - CellSize/2 || position.y > topRight.y + CellSize/2)
+        {
+            isValid = false;
+            return new Vector2();
+        }
+        int nearestX = 0;
+        int nearestY = 0;
+        for (int i = 0; i < GridWidth; i++)
+        {
+            if (Mathf.Abs(position.x - GetWorldPosition(new Vector2(i, 0)).x) <
+                Mathf.Abs(position.x - GetWorldPosition(new Vector2(nearestX, 0)).x))
+            {
+                nearestX = i;
+            }
+        }
+
+        for (int i = 0; i < GridHeight; i++)
+        {
+            if (Mathf.Abs(position.y - GetWorldPosition(new Vector2(0, i)).y) <
+                Mathf.Abs(position.y - GetWorldPosition(new Vector2(0, nearestY)).y))
+            {
+                nearestY = i;
+            }
+        }
+        isValid = true;
+        return new Vector2(nearestX, nearestY);
+    }
+    public Vector2 GetWorldPosition(Vector2 position)
+    {
+        float xPos = position.x;
+        float yPos = position.y;
+        
         float xWorldPos = GridOrigin.x + CellSize/2;
         float yWorldPos = GridOrigin.y + CellSize/2;
         for (int i = 0; i < xPos; i++)

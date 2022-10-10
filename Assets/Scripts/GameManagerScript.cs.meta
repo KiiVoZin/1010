@@ -4,9 +4,10 @@ MonoImporter:
   externalObjects: {}
   serializedVersion: 2
   defaultReferences:
-  - Grid: {fileID: 6908504796218377770, guid: 9d7bf687b1a908140811457cbac983b5, type: 3}
-  - Border: {fileID: 1826650107229382344, guid: 2505ac1f952503248ad93b6eddbf1387, type: 3}
-  - Spawner: {fileID: 7917504377145356092, guid: 40eaa901768afa840b527e7c81f8e018, type: 3}
+  - BasePrefab: {fileID: 6908504796218377770, guid: 9d7bf687b1a908140811457cbac983b5, type: 3}
+  - BorderPrefab: {fileID: 1826650107229382344, guid: 2505ac1f952503248ad93b6eddbf1387, type: 3}
+  - SpawnerPrefab: {fileID: 7917504377145356092, guid: 40eaa901768afa840b527e7c81f8e018, type: 3}
+  - BlockPrefab: {fileID: 4994250357333257997, guid: 50461ae5318925243b50a8b0abce3bfc, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
